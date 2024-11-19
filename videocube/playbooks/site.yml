@@ -1,0 +1,9 @@
+# playbooks/site.yml
+---
+
+- import_playbook: base_setup.yml
+- import_playbook: ntp_configuration.yml
+- import_playbook: disk_management.yml
+- import_playbook: software_install.yml
+- import_playbook: software_compilation.yml
+- import_playbook: system_configuration.yml

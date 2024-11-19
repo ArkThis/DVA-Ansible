@@ -1,0 +1,54 @@
+# playbooks/base_setup.yml
+---
+
+- name: Base System Setup
+  hosts: video_digitization_stations
+  become: yes
+  gather_facts: yes
+
+  vars_prompt:
+    - name: "samba_password"
+      prompt: "Enter Samba password for dva-profession user"
+      private: yes
+
+  tasks:
+    - name: Display dva_account variable for debugging
+      debug:
+        msg: "The dva_account variable is set to: {{ dva_account }}"
+
+    - name: Ensure 'dva-profession' user exists
+      ansible.builtin.user:
+        name: "{{ dva_account }}"
+        comment: "DVA Profession user"
+        createhome: yes
+        shell: /bin/bash
+
+    - name: Set password for 'dva-profession' (system)
+      ansible.builtin.shell: "echo '{{ dva_account }}:{{ samba_password }}' | chpasswd"
+
+    - name: Install Samba
+      ansible.builtin.package:
+        name: samba
+        state: present
+
+    - name: Add 'dva-profession' to Samba users
+      ansible.builtin.shell: |
+        (
+          echo "{{ samba_password }}"
+          echo "{{ samba_password }}"
+        ) | smbpasswd -a -s "{{ dva_account }}"
+      register: samba_add_user_result
+      changed_when: "'already exists' not in samba_add_user_result.stdout"
+      notify: Restart Samba
+
+    - name: Add 'dva-profession' to sudo group
+      ansible.builtin.user:
+        name: "{{ dva_account }}"
+        groups: sudo
+        append: yes
+
+  handlers:
+    - name: Restart Samba
+      ansible.builtin.service:
+        name: smbd
+        state: restarted

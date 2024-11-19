@@ -1,0 +1,42 @@
+# playbooks/software_compilation.yml
+---
+
+- name: Software Compilation
+  hosts: video_digitization_stations
+  become: yes
+  gather_facts: yes
+
+  tasks:
+
+    - name: Check if dpkg configuration is needed
+      ansible.builtin.command: "dpkg --audit"
+      register: dpkg_audit
+      changed_when: false
+
+    - name: Ensure any interrupted dpkg tasks are configured
+      ansible.builtin.command: "dpkg --configure -a"
+      when: dpkg_audit.stdout != ""
+      register: dpkg_fix
+      changed_when: dpkg_fix.rc == 0
+      ignore_errors: true
+
+    - name: Clone MPV repository
+      ansible.builtin.git:
+        repo: "{{ mpv_git }}"
+        dest: "{{ dva_dir }}/client_config/mpv"
+        update: no
+
+    - name: Run MPV setup script
+      ansible.builtin.command: "{{ mpv_install_script }}"
+      when: mpv_install_script is file
+
+    - name: Clone vrecordX repository
+      ansible.builtin.git:
+        repo: "{{ vrecordx_git }}"
+        dest: "{{ vrecordx_dir }}"
+        update: no
+
+    - name: Build vrecordX
+      ansible.builtin.make:
+        chdir: "{{ vrecordx_dir }}"
+        target: all

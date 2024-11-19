@@ -1,0 +1,21 @@
+# tasks/find_large_disk.yml
+---
+
+- name: List available disks
+  ansible.builtin.command: lsblk -o NAME,UUID,SIZE,TYPE,MOUNTPOINT --noheadings --bytes
+  register: lsblk_output
+
+- name: Select unmounted disk of required size
+  set_fact:
+    selected_disk_name: "{{ item.split()[0] }}"
+    selected_disk_uuid: "{{ item.split()[1] }}"
+  loop: "{{ lsblk_output.stdout_lines }}"
+  when:
+    - item.split()[2] | int >= 2 * 1024**4
+    - item.split()[3] == 'disk'
+    - (item.split() | length == 4 or item.split()[4] == '')
+
+- name: Fail if no suitable disk found
+  ansible.builtin.fail:
+    msg: "No unmounted disk with at least 2TB found."
+  when: selected_disk_name is not defined

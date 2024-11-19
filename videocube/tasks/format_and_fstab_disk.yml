@@ -1,0 +1,16 @@
+# tasks/format_and_fstab_disk.yml
+---
+
+- name: Format disk as ext4
+  ansible.builtin.filesystem:
+    fstype: ext4
+    dev: "/dev/{{ selected_disk_name }}"
+  when: selected_disk_name is defined
+
+- name: Mount disk at specified path
+  ansible.builtin.mount:
+    path: "{{ mount_path }}"
+    src: "UUID={{ selected_disk_uuid }}"
+    fstype: ext4
+    opts: defaults
+    state: mounted

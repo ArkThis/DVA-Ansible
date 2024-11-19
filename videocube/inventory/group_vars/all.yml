@@ -1,0 +1,25 @@
+# group_vars/all.yml
+
+# General Variables
+dva_account: "dva-profession"
+samba_password_prompt: true
+dva_dir: "/srv/dva-profession"
+dva_pkgs:
+  - subversion
+  - git
+  - samba
+  - cifs-utils
+  - make
+
+# Disk Variables
+mount_path: "/srv/dva-profession"
+
+# Git Repositories
+mpv_git: "https://github.com/ArkThis/AmPv.git"
+vrecordx_git: "https://github.com/ArkThis/vrecordX.git"
+mpv_install_script: "/srv/dva-profession/client_config/mpv/install-dva.sh"
+vrecordx_dir: "/opt/vrecordX"
+
+# NTP Server
+ntp_server: "time.dva-profession.local"
+

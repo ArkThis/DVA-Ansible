@@ -1,0 +1,11 @@
+# playbooks/disk_management.yml
+---
+
+- name: Disk Management
+  hosts: video_digitization_stations
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - include_tasks: ../tasks/find_large_disk.yml
+    - include_tasks: ../tasks/format_and_fstab_disk.yml

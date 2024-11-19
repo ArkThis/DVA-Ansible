@@ -1,0 +1,20 @@
+# playbooks/software_install.yml
+---
+
+- name: Software Installation
+  hosts: video_digitization_stations
+  become: yes
+  gather_facts: yes
+
+  tasks:
+
+    - name: Install required packages
+      ansible.builtin.package:
+        name: "{{ dva_pkgs }}"
+        state: present
+
+    - name: Install Shotcut via Snap
+      ansible.builtin.snap:
+        name: shotcut
+        classic: yes
+        state: present

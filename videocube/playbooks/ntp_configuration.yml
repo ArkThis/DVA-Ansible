@@ -1,0 +1,27 @@
+# playbooks/ntp_configuration.yml
+---
+
+- name: Configure NTP settings
+  hosts: video_digitization_stations
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Set NTP configuration in /etc/systemd/timesyncd.conf
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/timesyncd.conf
+        regexp: '{{ item.regexp }}'
+        line: '{{ item.line }}'
+        insertafter: '\[Time\]'
+        create: true
+        state: present
+      with_items:
+        - { regexp: '^NTP=.*$', line: 'NTP={{ ntp_server }}' }
+#        - { regexp: '^FallbackNTP=.*$', line: 'FallbackNTP=0.pool.ntp.org 1.pool.ntp.org' }
+      notify: Restart systemd-timesyncd
+
+  handlers:
+    - name: Restart systemd-timesyncd
+      ansible.builtin.service:
+        name: systemd-timesyncd
+        state: restarted

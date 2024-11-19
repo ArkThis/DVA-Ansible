@@ -1,0 +1,7 @@
+# inventory/hosts
+
+[video_digitization_stations]
+192.168.2.25 ansible_user=vid ansible_password="{{ lookup('env', 'ANSIBLE_PASSWORD') }}" ansible_connection=ssh ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+[all:children]
+video_digitization_stations

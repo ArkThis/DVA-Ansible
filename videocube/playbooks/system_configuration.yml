@@ -1,0 +1,20 @@
+# playbooks/system_configuration.yml
+---
+
+- name: System Configuration
+  hosts: video_digitization_stations
+  become: yes
+  gather_facts: yes
+
+  tasks:
+
+    - name: Reduce swappiness
+      ansible.builtin.sysctl:
+        name: vm.swappiness
+        value: 1
+        state: present
+
+    - name: Restart DNS resolver
+      ansible.builtin.service:
+        name: systemd-resolved
+        state: restarted
