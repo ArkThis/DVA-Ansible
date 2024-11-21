@@ -21,5 +21,4 @@ mpv_install_script: "/srv/dva-profession/client_config/mpv/install-dva.sh"
 vrecordx_dir: "/opt/vrecordX"
 
 # NTP Server
-ntp_server: "time.dva-profession.local"
-
+ntp_server: "mdc2.tmw.ac.at"
