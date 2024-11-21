@@ -1,0 +1,9 @@
+---
+- name: Uninstall Anydesk
+  hosts: video_digitization_stations
+  become: yes
+  tasks:
+    - name: Remove anydesk package if installed
+      apt:
+        name: anydesk
+        state: absent

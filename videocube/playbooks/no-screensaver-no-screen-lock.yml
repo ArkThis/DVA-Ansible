@@ -1,0 +1,16 @@
+---
+- name: Disable screensaver and screen lock in XFCE
+  hosts: video_digitization_stations
+  become: yes
+  tasks:
+    - name: Disable screensaver
+      command: >
+        xfconf-query -c xfce4-session -p /startup/screensaver/enabled -s false
+      environment:
+        DISPLAY: ":0"
+
+    - name: Disable screen lock
+      command: >
+        xfconf-query -c xfce4-session -p /startup/screensaver/lock -s false
+      environment:
+        DISPLAY: ":0"
