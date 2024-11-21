@@ -7,6 +7,17 @@
     dev: "/dev/{{ selected_disk_name }}"
   when: selected_disk_name is defined
 
+- name: Retrieve UUID of formatted disk
+  ansible.builtin.command: blkid -s UUID -o value /dev/{{ selected_disk_name }}
+  register: formatted_disk_uuid
+  when: selected_disk_name is defined
+
+- name: Set new disk UUID
+  set_fact:
+    selected_disk_uuid: "{{ formatted_disk_uuid.stdout }}"
+  when: formatted_disk_uuid is defined
+
+
 - name: Mount disk at specified path
   ansible.builtin.mount:
     path: "{{ mount_path }}"

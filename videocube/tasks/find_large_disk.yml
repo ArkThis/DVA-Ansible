@@ -1,19 +1,46 @@
 # tasks/find_large_disk.yml
 ---
 
-- name: List available disks
-  ansible.builtin.command: lsblk -o NAME,UUID,SIZE,TYPE,MOUNTPOINT --noheadings --bytes
+- name: Run lsblk to gather disk information
+  ansible.builtin.command:
+    cmd: lsblk --json -o NAME,UUID,SIZE,TYPE,MOUNTPOINT --bytes
   register: lsblk_output
+  failed_when:
+    - lsblk_output.rc != 0
+    - lsblk_output.stdout is not defined
+    - lsblk_output.stdout == ''
+  changed_when: false
+
+- name: Debug raw lsblk output
+  debug:
+    msg: "{{ lsblk_output.stdout }}"
+  when:
+    - lsblk_output is defined
+    - lsblk_output.stdout is defined
+
+- name: Debug parsed lsblk JSON
+  debug:
+    msg: "{{ lsblk_output.stdout | from_json }}"
+  when:
+    - lsblk_output is defined
+    - lsblk_output.stdout is defined
 
 - name: Select unmounted disk of required size
   set_fact:
-    selected_disk_name: "{{ item.split()[0] }}"
-    selected_disk_uuid: "{{ item.split()[1] }}"
-  loop: "{{ lsblk_output.stdout_lines }}"
+    selected_disk_name: "{{ item.name }}"
+    selected_disk_uuid: "{{ item.uuid | default('') }}"
+  loop: "{{ lsblk_output.stdout | from_json | json_query('blockdevices[?type == `disk` && (!children || children == null) && (!mountpoint || mountpoint == ``)]') }}"
   when:
-    - item.split()[2] | int >= 2 * 1024**4
-    - item.split()[3] == 'disk'
-    - (item.split() | length == 4 or item.split()[4] == '')
+    - lsblk_output is defined
+    - lsblk_output.stdout is defined
+    - item.size is defined
+    - item.size | int >= 2199023255552  # 2TB in bytes
+    - item is defined
+
+- name: Debug selected disk
+  debug:
+    msg: "Selected disk: {{ selected_disk_name }} (UUID: {{ selected_disk_uuid }})"
+  when: selected_disk_name is defined
 
 - name: Fail if no suitable disk found
   ansible.builtin.fail:
