@@ -1,7 +1,7 @@
 # inventory/hosts
 
 [video_digitization_stations]
-192.168.200.26 ansible_user=vid ansible_password="{{ lookup('env', 'ANSIBLE_PASSWORD') }}" ansible_connection=ssh ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+video-cube4.dva-profession.local ansible_user=vid ansible_password="{{ lookup('ini', 'env.ANSIBLE_PASSWORD file=project/.env') }}" ansible_connection=ssh ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 
 [all:children]
 video_digitization_stations
